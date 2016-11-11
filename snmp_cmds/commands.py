@@ -39,7 +39,7 @@ class SNMPTimeout(Exception):
 
 class SNMPUnknownHost(Exception):
     """
-    Exception raised when an SNMP command is unable to identify a host host.
+    Exception raised when an SNMP command is unable to identify a host.
     """
 
     def __init__(self, ip):
@@ -86,4 +86,4 @@ def snmpget(agent, oid, version=None, community_string=None):
     return _snmp_command('snmpget', *options)
 
 
-print(snmpget('10.13.112.10', '.1.3.6.1.2.1.1.5.0', version='3', community_string=''))
+
