@@ -1,89 +1,35 @@
-# TODO: Module Docs
-"""
-"""
-
-from collections import namedtuple
-import sys
-import re
-sys.path.append('modules')
-
-# import sh if available. If sh is imported into a module on Windows, it raises an ImportError
-try:
-    import sh  # External module sh. Does not work on windows
-    from sh import ErrorReturnCode, CommandNotFound
-except ImportError:
-    import pbs as sh  # External module pbs. Predecessor to and functionally identical to sh. Works on windows.
-    from pbs import ErrorReturnCode, CommandNotFound
-# Perform a basic test during import to ensure net-snmp is installed.
-try:
-    sh.Command('snmpget')()
-except (OSError, CommandNotFound):
-    sys.tracebacklimit = 0
-    raise ImportError('Net-SNMP does not appear to be installed on this system, '
-                      'or the Net-SNMP commands are not on your PATH')
-except ErrorReturnCode:
-    pass
+# Internal module imports
+# Internal module imports
+from .helpers import snmp_command
 
 
-class SNMPTimeout(Exception):
-    """
-    Exception raised when an SNMP command times out connecting to host.
-    """
-
-    def __init__(self, ip):
-        self.IP = ip
-        self.message = "Timeout while trying to connect to {ip}\n Either the device is offline, or the " \
-                       "SNMP credentials provided were incorrect.".format(ip=ip)
-        super(SNMPTimeout, self).__init__(self.message)
-
-
-class SNMPUnknownHost(Exception):
-    """
-    Exception raised when an SNMP command is unable to identify a host.
-    """
-
-    def __init__(self, ip):
-        self.IP = ip
-        self.message = "Unknown host: " + ip
-        super(SNMPUnknownHost, self).__init__(self.message)
-
-
-# This named tuple will be used as the return value for every snmp command. that way users will be able to access all of
-#  the return values with dot notation. (ex. result.value)
-_SNMPResult = namedtuple('SNMPResult', ['mib', 'oid', 'type', 'value'])
-
-
-# This is the baseline command shared by all of the user-accessible snmp commands
-# TODO: implement more thorough error handling
-# TODO: implement handling results, instead of just passing them up
-def _snmp_command(command, *args):
-    cmd = sh.Command(command)
-    try:
-        result = cmd(*args)
-    except ErrorReturnCode as e:
-        print(e.stderr)
-        if re.search('Timeout', e.stderr):
-            host = re.search('Timeout: No Response from (.*)\.', e.stderr, re.MULTILINE).group(1)
-            raise SNMPTimeout(host)
-        elif re.search('Unknown host', e.stderr):
-            host = re.search('Unknown host \((.*?)\)', e.stderr, re.MULTILINE).group(1)
-            raise SNMPUnknownHost(host)
-        else:
-            raise
-    else:
-        return result
-
-
-def snmpget(agent, oid, version=None, community_string=None):
+def snmpget(
+        agent, oid, version='2c', v2_community_string='public', v3_auth_protocol=None, v3_auth_passphrase=None,
+        v3_security_engine_id=None, v3_context_engine_id=None, v3_security_level=None, v3_context_name=None,
+        v3_user_name=None, v3_privacy_protocol=None, v3_privacy_passphrase=None, v3_dest_engine_boots_time=None):
     options = []
-    if version:
-        options.extend(['-v', version])
-    if community_string:
-        options.extend(['-c', community_string])
+    options.extend(['-v', version])
+    if v2_community_string and version == '2c':
+        options.extend(['-c', v2_community_string])
+    if v3_auth_protocol and version == '3':
+        options.extend(['-a', v3_auth_protocol])
+    if v3_auth_passphrase and version == '3':
+        options.extend(['-A', v3_auth_passphrase])
+    if v3_security_engine_id and version == '3':
+        options.extend(['-e', v3_security_engine_id])
+    if v3_context_engine_id and version == '3':
+        options.extend(['-E', v3_context_engine_id])
+    if v3_security_level and version == '3':
+        options.extend(['-l', v3_security_level])
+    if v3_context_name and version == '3':
+        options.extend(['-n', v3_context_name])
+    if v3_user_name and version == '3':
+        options.extend(['-u', v3_user_name])
+    if v3_privacy_protocol and version == '3':
+        options.extend(['-x', v3_privacy_protocol])
+    if v3_privacy_passphrase and version == '3':
+        options.extend(['-X', v3_privacy_passphrase])
+    if v3_dest_engine_boots_time and version == '3':
+        options.extend(['-Z', v3_dest_engine_boots_time])
 
-    options.extend([agent, oid])
-
-    return _snmp_command('snmpget', *options)
-
-
-
+    return snmp_command('snmpget', agent, oid, *options)
