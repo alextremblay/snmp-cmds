@@ -1,4 +1,4 @@
-from .commands import snmpget
+from .commands import snmpget, snmpwalk
 
 
 class Session(object):
@@ -9,3 +9,6 @@ class Session(object):
 
     def get(self, oid):
         return snmpget(self.agent, oid, self.version, self.v2_community_string)
+
+    def walk(self, oid):
+        return snmpwalk(self.agent, oid, self.version, self.v2_community_string)

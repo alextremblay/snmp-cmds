@@ -10,7 +10,7 @@ def get_requirements():
     return requires
 
 setup(
-    name='snmp_cmds',
+    name='snmp-cmds',
     version='0.1',
     description='A python library for issuing SNMP commands',
     long_description='''This package is a wrapper around the Net-SNMP command line utilities''',
@@ -43,7 +43,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    packages=find_packages(),
+    packages=['snmp_cmds'],
     install_requires=get_requirements(),
     entry_points=None
 )

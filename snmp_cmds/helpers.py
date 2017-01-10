@@ -24,10 +24,6 @@ except (OSError, CommandNotFound):
 except ErrorReturnCode:
     pass
 
-# This compiled Regex will allow us to split the string we receive from any of the net-snmp shell commands into usable
-# chunks
-result_splitter = re.compile(r'::| = |(?<=[A-Z]{2}): ')
-
 # This named tuple will be used as the return value for every snmp command. that way users will be able to access all of
 #  the return values with dot notation. (ex. result.value)
 SNMPResult = namedtuple('SNMPResult', ['mib', 'oid', 'type', 'value'])
@@ -60,9 +56,4 @@ def snmp_command(command, ip, oid, *args):
             raise
 
     else:
-        result = result_splitter.split(str(result))
-        if 'No Such' in result[2]:
-            return SNMPResult(mib=result[0], oid=result[1], type='NoSuchInstance', value=None)
-        for index in range(len(result)):
-            result[index] = result[index].strip('\n')
-        return SNMPResult(*result)
+        return result
