@@ -7,13 +7,8 @@ import re
 from .exceptions import SNMPValueError, SNMPUnknownHost, SNMPTimeout
 
 # External module imports
-# import sh if available. If sh is imported on Windows, it raises an ImportError
-try:
-    import sh  # External module sh. Does not work on windows
-    from sh import ErrorReturnCode, CommandNotFound
-except ImportError:
-    import pbs as sh  # External module pbs. Predecessor to and functionally identical to sh. Works on windows.
-    from pbs import ErrorReturnCode, CommandNotFound
+from plumbum
+
 # Perform a basic test during import to ensure net-snmp is installed.
 try:
     sh.Command('snmpget')()

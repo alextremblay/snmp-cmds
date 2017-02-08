@@ -23,19 +23,3 @@ class SNMPUnknownHost(Exception):
         self.IP = ip
         self.message = "Unknown host: " + ip
         super(SNMPUnknownHost, self).__init__(self.message)
-
-
-class SNMPValueError(Exception):
-    """
-
-    Exception raised when an SNMP command returns a 'No Such Object' or 'No Such Instance' message
-
-    """
-
-    def __init__(self, mib, oid, ip):
-        self.mib = mib
-        self.oid = oid
-        self.ip = ip
-        self.message = "No value was found at this OID on this device. \n " \
-                       "OID={0}::{1} \n Device={2}".format(self.mib, self.oid, self.ip)
-        super(SNMPValueError, self).__init__(self.message)
