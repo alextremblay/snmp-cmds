@@ -5,3 +5,4 @@ venv*/
 testing.ipynb
 .DS_Store
 tests/variables.cfg
+.idea/
