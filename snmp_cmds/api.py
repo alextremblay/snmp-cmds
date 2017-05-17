@@ -1,4 +1,4 @@
-from .commands import snmpget, snmpwalk
+from .commands import snmpget, snmpgetbulk, snmpwalk, snmptable
 
 
 class Session(object):

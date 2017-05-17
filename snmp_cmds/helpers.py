@@ -1,54 +1,55 @@
-# Python Standard Library imports
-from collections import namedtuple
-import sys
-import re
+# Standard Library imports
+from ipaddress import ip_address
+from socket import getaddrinfo, gaierror
+
+# imports for type-hinting purposes
+from subprocess import CompletedProcess
 
 # Internal module imports
-from .exceptions import SNMPValueError, SNMPUnknownHost, SNMPTimeout
-
-# External module imports
-from plumbum
-
-# Perform a basic test during import to ensure net-snmp is installed.
-try:
-    sh.Command('snmpget')()
-except (OSError, CommandNotFound):
-    sys.tracebacklimit = 0
-    raise ImportError('Net-SNMP does not appear to be installed on this system, '
-                      'or the Net-SNMP commands are not on your PATH')
-except ErrorReturnCode:
-    pass
-
-# This named tuple will be used as the return value for every snmp command. that way users will be able to access all of
-#  the return values with dot notation. (ex. result.value)
-SNMPResult = namedtuple('SNMPResult', ['mib', 'oid', 'type', 'value'])
+from .exceptions import SNMPError
 
 
-# This is the baseline command shared by all of the user-accessible snmp commands
-def snmp_command(command, ip, oid, *args):
-    cmd = sh.Command(command)
-    options = list(args)
-    options.extend([ip, oid])
+def validate_ip_address(ipaddress: str) -> str:
+    """
+    convert the IP Address string into an IPv4Address or IPv6Address
+    then back into a string. This is a cheap and easy way to do IP
+    address validation. If the string is not a valid address,
+    a ValueError will be raised
+    """
     try:
-        result = cmd(*options)
-    except ErrorReturnCode as e:
+        ipaddr = getaddrinfo(ipaddress, None)[0][4][0]
+        ipaddr = ip_address(ipaddr)
+        return str(ipaddr)
+    except (gaierror, ValueError):
+        raise SNMPError("Invalid Address: {0} does not appear to be a valid "
+                        "hostname / IP address".format(ipaddress))
 
-        # If the word timeout shows up in the error message returned from the shell command, we should raise a
-        # timeout error
-        if re.search('Timeout', e.stderr):
-            host = re.search('Timeout: No Response from (.*)\.', e.stderr, re.MULTILINE).group(1)
-            raise SNMPTimeout(host)
 
-        # If the phrase Unknown host shows up in the error message returned from the shell command, we should raise an
-        # unknownhost error
-        elif re.search('Unknown host', e.stderr):
-            host = re.search('Unknown host \((.*?)\)', e.stderr, re.MULTILINE).group(1)
-            raise SNMPUnknownHost(host)
+def check_for_timeout(cmd: CompletedProcess, ipaddress: str, port: str) -> None:
+    """
+    look for a timeout condition in the completed command's output and raise 
+    an error if needed
+    :param cmd: 
+    :param ipaddress: 
+    :param port: 
+    :return: 
+    """
+    if b'No Response from' in cmd.stderr:
+        raise SNMPError(
+            "Timeout: no response received from {0}:{1}".format(
+                ipaddress, port)
+        )
 
-        # If we get any other error message from the shell command, we should re-raise it since we don't know how to
-        # handle it.
-        else:
-            raise
 
-    else:
-        return result
+def handle_unknown_error(cmdstr: str, cmd: CompletedProcess) -> None:
+    """
+    Catch-all for any unhandled error message. Raises an Error showing the 
+    snmp command attempted, and the error message received.
+    :param cmdstr: 
+    :param cmd: 
+    :return: 
+    """
+    raise ChildProcessError(
+        "The SNMP command failed. \nAttempted Command: {0}\n Error received: "
+        "{1}".format(cmdstr, str(cmd.stderr))
+    )

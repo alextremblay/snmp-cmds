@@ -1,3 +1,10 @@
+class SNMPError(Exception):
+    """
+    We'll use this error class anytime we receive a known, expected error 
+    from an underlying net-snmp command we run
+    """
+    pass
+
 class SNMPTimeout(Exception):
     """
 
@@ -7,8 +14,9 @@ class SNMPTimeout(Exception):
 
     def __init__(self, ip):
         self.IP = ip
-        self.message = "Timeout while trying to connect to {ip}\n Either the device is offline, or the " \
-                       "SNMP credentials provided were incorrect.".format(ip=ip)
+        self.message = "Timeout while trying to connect to {ip}\n Either the \
+                       device is offline, or the SNMP credentials provided \
+                       were incorrect.".format(ip=ip)
         super(SNMPTimeout, self).__init__(self.message)
 
 
