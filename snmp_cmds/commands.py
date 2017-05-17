@@ -1,9 +1,11 @@
 """
-This internal module serves as an interface between the python application and
-the net-snmp binaries on the host system. This module will provide a function
-for each net-snmp binary used, run that binary with custom options, parse its
-output, and deliver it back in a meaningful form. 
+This internal module serves as an interface between a python application and
+the net-snmp binaries on the host system. This module provides a function
+for each of the most popular net-snmp binary commands, runs that binary 
+with custom options, parse its output, and delivers it back in a meaningful 
+form. 
 """
+
 # Standard Library imports
 import csv
 from subprocess import run, PIPE
@@ -12,7 +14,7 @@ from subprocess import run, PIPE
 from typing import Union, Optional, List, Tuple, Dict
 
 # Internal module imports
-from .exceptions import SNMPError
+from .exceptions import SNMPTableError
 from .helpers import validate_ip_address, check_for_timeout, \
     handle_unknown_error
 
@@ -231,10 +233,7 @@ def snmptable(community: str, ipaddress: str, oid: str,
         check_for_timeout(cmd, ipaddress, port)
 
         if b'Was that a table?' in cmd.stderr:
-            raise SNMPError(
-                "The snmptable command could not identify {0} as a table. "
-                "Please be sure the OID is correct, and that your net-snmp "
-                "installation has a MIB available for that OID.".format(oid))
+            raise SNMPTableError(oid)
         else:
             handle_unknown_error(cmdstr, cmd)
     # Process results

@@ -6,7 +6,7 @@ from socket import getaddrinfo, gaierror
 from subprocess import CompletedProcess
 
 # Internal module imports
-from .exceptions import SNMPError
+from .exceptions import SNMPError, SNMPTimeout, SNMPInvalidAddress
 
 
 def validate_ip_address(ipaddress: str) -> str:
@@ -21,8 +21,7 @@ def validate_ip_address(ipaddress: str) -> str:
         ipaddr = ip_address(ipaddr)
         return str(ipaddr)
     except (gaierror, ValueError):
-        raise SNMPError("Invalid Address: {0} does not appear to be a valid "
-                        "hostname / IP address".format(ipaddress))
+        raise SNMPInvalidAddress(ipaddress)
 
 
 def check_for_timeout(cmd: CompletedProcess, ipaddress: str, port: str) -> None:
@@ -35,21 +34,19 @@ def check_for_timeout(cmd: CompletedProcess, ipaddress: str, port: str) -> None:
     :return: 
     """
     if b'No Response from' in cmd.stderr:
-        raise SNMPError(
-            "Timeout: no response received from {0}:{1}".format(
-                ipaddress, port)
-        )
+        host = "{}:{}".format(ipaddress, port)
+        raise SNMPTimeout(host)
 
 
 def handle_unknown_error(cmdstr: str, cmd: CompletedProcess) -> None:
     """
-    Catch-all for any unhandled error message. Raises an Error showing the 
-    snmp command attempted, and the error message received.
-    :param cmdstr: 
-    :param cmd: 
-    :return: 
+    Catch-all for any unhandled error message coming from one of the net-smnp 
+    commands. Raises an SNMPError showing the snmp command attempted, and the 
+    error message received.
+    :param cmdstr: the full command sent to subprocess
+    :param cmd: the subprocess.CompletedProcess returned
     """
-    raise ChildProcessError(
+    raise SNMPError(
         "The SNMP command failed. \nAttempted Command: {0}\n Error received: "
         "{1}".format(cmdstr, str(cmd.stderr))
     )
