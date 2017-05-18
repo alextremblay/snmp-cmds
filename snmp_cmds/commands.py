@@ -20,7 +20,8 @@ from .helpers import validate_ip_address, check_for_timeout, \
 
 
 def snmpget(community: str, ipaddress: str, oid: str,
-            port: Union[str, int] = 161, timeout: int = 3) -> Optional[str]:
+            port: Union[int, str] = 161, timeout: Union[int, str] = 3) \
+        -> Optional[str]:
     """
     Runs Net-SNMP's 'snmpget' command on a given OID, and returns the result.
     :param community: the snmpv2 community string
@@ -32,19 +33,21 @@ def snmpget(community: str, ipaddress: str, oid: str,
     :return: 
     """
     ipaddress = validate_ip_address(ipaddress)
+    host = '{}:{}'.format(ipaddress, port)
 
-    cmdstr = "snmpget -Oqv -Pe -t {0} -r 0 -v 2c -c {1} {2}:{3} {4}" \
-        .format(timeout, community, ipaddress, port, oid)
+    cmdargs = [
+        'snmpget', '-Oqv', '-Pe', '-t', str(timeout), '-r', '0', '-v', '2c',
+        '-c', community, host, oid]
 
-    cmd = run(cmdstr, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = run(cmdargs, stdout=PIPE, stderr=PIPE)
 
     # Handle any errors that came up
     if cmd.returncode is not 0:
-        check_for_timeout(cmd, ipaddress, port)
+        check_for_timeout(cmd.stderr, host)
 
         # if previous check didn't generate an Error, this handler will be
         # called as a sort of catch-all
-        handle_unknown_error(cmdstr, cmd)
+        handle_unknown_error(' '.join(cmdargs), cmd.stderr)
     # Process results
     else:
         # subprocess returns stdout from completed command as a single bytes
@@ -74,22 +77,25 @@ def snmpgetbulk(community: str, ipaddress: str, oids: List[str],
     :return: 
     """
     ipaddress = validate_ip_address(ipaddress)
+    host = '{}:{}'.format(ipaddress, port)
 
     if type(oids) is not list:
         oids = [oids]
 
-    cmdstr = "snmpget -OQfn -Pe -t {0} -r 0 -v 2c -c {1} {2}:{3} {4}" \
-        .format(timeout, community, ipaddress, port, ' '.join(oids))
+    cmdargs = [
+        'snmpget', '-OQfn', '-Pe', '-t', str(timeout), '-r', '0', '-v', '2c',
+        '-c', community, host, *oids
+    ]
 
-    cmd = run(cmdstr, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = run(cmdargs, stdout=PIPE, stderr=PIPE)
 
     # Handle any errors that came up
     if cmd.returncode is not 0:
-        check_for_timeout(cmd, ipaddress, port)
+        check_for_timeout(cmd.stderr, host)
 
         # if previous check didn't generate an Error, this handler will be
         # called as a sort of catch-all
-        handle_unknown_error(cmdstr, cmd)
+        handle_unknown_error(' '. join(cmdargs), cmd.stderr)
     # Process results
     else:
         cmdoutput = cmd.stdout.splitlines()
@@ -145,19 +151,22 @@ def snmpwalk(community: str, ipaddress: str, oid: str,
     :return: 
     """
     ipaddress = validate_ip_address(ipaddress)
+    host = '{}:{}'.format(ipaddress, port)
 
-    cmdstr = "snmpwalk -OQfn -Pe -t {0} -r 0 -v 2c -c {1} {2}:{3} {4}" \
-        .format(timeout, community, ipaddress, port, oid)
+    cmdargs = [
+        'snmpwalk', '-OQfn', '-Pe', '-t', str(timeout), '-r', '0', '-v', '2c',
+        '-c', community, host, oid
+    ]
 
-    cmd = run(cmdstr, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = run(cmdargs, stdout=PIPE, stderr=PIPE)
 
     # Handle any errors that came up
     if cmd.returncode is not 0:
-        check_for_timeout(cmd, ipaddress, port)
+        check_for_timeout(cmd.stderr, host)
 
         # if previous check didn't generate an Error, this handler will be
         # called as a sort of catch-all
-        handle_unknown_error(cmdstr, cmd)
+        handle_unknown_error(' '.join(cmdargs), cmd.stderr)
     # Process results
     else:
         cmdoutput = cmd.stdout.splitlines()
@@ -221,21 +230,23 @@ def snmptable(community: str, ipaddress: str, oid: str,
     delimiter = '\x1E'
 
     ipaddress = validate_ip_address(ipaddress)
+    host = '{}:{}'.format(ipaddress, port)
 
-    cmdstr = 'snmptable -m ALL -Pe -t {5} -r 0 -v 2c -Cif {0} -c {1} {2}:{3} ' \
-             '{4}' \
-        .format(delimiter, community, ipaddress, port, oid, timeout)
+    cmdargs = [
+        'snmptable', '-m', 'ALL', '-Pe', '-t', str(timeout), '-r', '0', '-v',
+        '2c', '-Cif', delimiter, '-c', community, host, oid
+    ]
 
-    cmd = run(cmdstr, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = run(cmdargs, stdout=PIPE, stderr=PIPE)
 
     # Handle any errors that came up
     if cmd.returncode is not 0:
-        check_for_timeout(cmd, ipaddress, port)
+        check_for_timeout(cmd.stderr, host)
 
         if b'Was that a table?' in cmd.stderr:
             raise SNMPTableError(oid)
         else:
-            handle_unknown_error(cmdstr, cmd)
+            handle_unknown_error(' '.join(cmdargs), cmd.stderr)
     # Process results
     else:
         # subprocess returns stdout from completed command as a single bytes

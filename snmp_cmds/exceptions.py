@@ -5,6 +5,7 @@ class SNMPError(Exception):
     """
     pass
 
+
 class SNMPTableError(SNMPError):
     """
     This error will be thrown when the snmptable command is called with an 
@@ -13,9 +14,8 @@ class SNMPTableError(SNMPError):
     def __init__(self, oid):
         self.oid = oid
         self.message = "The snmptable command could not identify {oid} as a \
-                       table. Please be sure the OID is correct, and that your \
-                       net-snmp installation has a MIB available for that \
-                       OID.".format(oid=oid)
+table. Please be sure the OID is correct, and that your net-snmp installation \
+has a MIB available for that OID.".format(oid=oid)
         super().__init__(self.message)
 
 
@@ -27,8 +27,8 @@ class SNMPTimeout(SNMPError):
     def __init__(self, ip):
         self.IP = ip
         self.message = "Timeout while trying to connect to {ip}\n Either the \
-                       device is offline, or the SNMP credentials provided \
-                       were incorrect.".format(ip=ip)
+device is offline, or the SNMP credentials provided were incorrect."\
+            .format(ip=ip)
         super().__init__(self.message)
 
 
@@ -41,5 +41,5 @@ class SNMPInvalidAddress(SNMPError):
     def __init__(self, host):
         self.host = host
         self.message = "{0} does not appear to be a valid hostname / IP \
-                       address".format(host)
+address".format(host)
         super().__init__(self.message)

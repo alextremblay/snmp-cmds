@@ -2,9 +2,6 @@
 from ipaddress import ip_address
 from socket import getaddrinfo, gaierror
 
-# imports for type-hinting purposes
-from subprocess import CompletedProcess
-
 # Internal module imports
 from .exceptions import SNMPError, SNMPTimeout, SNMPInvalidAddress
 
@@ -24,29 +21,26 @@ def validate_ip_address(ipaddress: str) -> str:
         raise SNMPInvalidAddress(ipaddress)
 
 
-def check_for_timeout(cmd: CompletedProcess, ipaddress: str, port: str) -> None:
+def check_for_timeout(cmderr: bytes, host: str) -> None:
     """
     look for a timeout condition in the completed command's output and raise 
     an error if needed
-    :param cmd: 
-    :param ipaddress: 
-    :param port: 
-    :return: 
+    :param cmderr: the called process's stderr output
+    :param host:
     """
-    if b'No Response from' in cmd.stderr:
-        host = "{}:{}".format(ipaddress, port)
+    if b'No Response from' in cmderr:
         raise SNMPTimeout(host)
 
 
-def handle_unknown_error(cmdstr: str, cmd: CompletedProcess) -> None:
+def handle_unknown_error(cmdstr: str, cmderr: bytes) -> None:
     """
     Catch-all for any unhandled error message coming from one of the net-smnp 
     commands. Raises an SNMPError showing the snmp command attempted, and the 
     error message received.
     :param cmdstr: the full command sent to subprocess
-    :param cmd: the subprocess.CompletedProcess returned
+    :param cmderr: the called process's stderr output
     """
     raise SNMPError(
         "The SNMP command failed. \nAttempted Command: {0}\n Error received: "
-        "{1}".format(cmdstr, str(cmd.stderr))
+        "{1}".format(cmdstr, cmderr)
     )
