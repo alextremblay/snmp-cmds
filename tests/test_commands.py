@@ -267,10 +267,9 @@ def test_snmpset_value_out_of_range_error():
     with pytest.raises(SNMPWriteError) as excinfo:
         snmpset(ipaddress=SNMP_SRV_ADDR, oid='SNMPv2-MIB::sysName.0',
                 value_type='s', value='Thiiiiiiiiiiiiiiiiiiiiiiiiiiiiis '
-                                      'sssssttttttttrrrriiiiiiiiiiiiiiinnnnnnnnnnnnng is '
-                                      'wwwwwwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyy '
-                                      'tttoooooooooooooooooooooooooooooooooooooooooooooo '
-                                      'lllooooooooooooooooooooooonnnnnnnnnnnnnnnnnnnggggg'
-                                      ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!',
-                port=SNMP_SRV_PORT)
+                'sssssttttttttrrrriiiiiiiiiiiiiiinnnnnnnnnnnnng is '
+                'wwwwwwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyy '
+                'tttoooooooooooooooooooooooooooooooooooooooooooooo '
+                'lllooooooooooooooooooooooonnnnnnnnnnnnnnnnnnnggggg'
+                ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!', port=SNMP_SRV_PORT)
     assert 'Value out of range' in str(excinfo.value)
