@@ -3,7 +3,6 @@ class SNMPError(Exception):
     We'll use this error class or a subclass anytime we receive an error from 
     an underlying net-snmp command we run
     """
-    pass
 
 
 class SNMPTableError(SNMPError):
@@ -43,3 +42,10 @@ class SNMPInvalidAddress(SNMPError):
         self.message = "{0} does not appear to be a valid hostname / IP \
 address".format(host)
         super().__init__(self.message)
+
+
+class SNMPWriteError(SNMPError):
+    """
+    Exception raised when a call to snmpset fails with an snmpset-specific 
+    error message
+    """

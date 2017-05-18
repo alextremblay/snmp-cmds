@@ -40,6 +40,17 @@ def test_snmp_timeout():
         assert 'Timeout' in str(excinfo.value)
 
 
+@pytest.mark.slow
+def test_snmpset_timeout():
+    """
+    ensure snmpset correctly implements the check_for_timeout function
+    """
+    with pytest.raises(exceptions.SNMPTimeout) as excinfo:
+        commands.snmpset('public', '10.0.0.1', 'IF-MIB::ifTable', 's',
+                         'random string', timeout='1')
+    assert 'Timeout' in str(excinfo.value)
+
+
 def test_snmptable_return_structure():
     """
     snmptable return data should be a list of dicts containing info about 
@@ -188,3 +199,72 @@ def test_snmpwalk_return_contains_multiline_output():
                                'SNMPv2-MIB::system', SNMP_SRV_PORT)
     assert type(result[0]) is tuple
     assert '\n' in result[0][1]
+
+
+def test_snmpset_return_structure():
+    """
+    On success, snmpset should return a string detailing the OID that was 
+    updated, and the value that was set
+    """
+    result = commands.snmpset('public', SNMP_SRV_ADDR,
+                              'SNMPv2-MIB::sysName.0', 's',
+                              'Test Description', port=SNMP_SRV_PORT)
+    assert 'Test Description' in result
+
+
+def test_snmpset_unwritable_field():
+    """
+    When an attempt is made to write to a field the target device doesn't 
+    support writing to, net-snmp's snmpget command produces a "No Such 
+    Instance" error. Our function should replicate this
+    """
+    with pytest.raises(exceptions.SNMPWriteError) as excinfo:
+        commands.snmpset('public', SNMP_SRV_ADDR, 'SNMPv2-MIB::sysDescr.0', 's',
+                         'Test Description', port=SNMP_SRV_PORT)
+    assert 'No Such Instance' in str(excinfo.value)
+
+
+def test_snmpset_non_existant_type():
+    """
+    There are a specific set of type codes which net-snmp's snmpset command 
+    will accept. Our function should raise an SNMPWriteError if none of those 
+    are specified
+    """
+    with pytest.raises(exceptions.SNMPWriteError) as excinfo:
+        commands.snmpset('public', SNMP_SRV_ADDR, 'SNMPv2-MIB::sysName.0', 'z',
+                         'Test Description', port=SNMP_SRV_PORT)
+    assert str(excinfo.value) == 'The type value you specified does not ' \
+                                 'match one of the accepted type codes.\n' \
+                                 'Valid type codes are one of ' \
+                                 '(i|u|t|a|o|s|x|d|b)'
+
+
+def test_snmpset_wrong_type():
+    """
+    When an attempt is made to set a variable of one type (an integer, 
+    for example) with a value of another type (say, a string), our function 
+    should raise an SNMPWriteError to let us know this is not OK.
+    """
+    with pytest.raises(exceptions.SNMPWriteError) as excinfo:
+        commands.snmpset('public', SNMP_SRV_ADDR,
+                         'SNMPv2-MIB::sysName.0', 'a',
+                         '255.255.255.255', port=SNMP_SRV_PORT)
+    assert 'Bad variable type' in str(excinfo.value)
+
+
+def test_snmpset_value_out_of_range_error():
+    """
+    If an attempt is made to write a value to an OID which is larger than the 
+    max allowable size for that OID, an SNMPWriteError should be raised to let 
+    us know 
+    """
+    with pytest.raises(exceptions.SNMPWriteError) as excinfo:
+        commands.snmpset('public', SNMP_SRV_ADDR,
+                         'SNMPv2-MIB::sysName.0', 's',
+                         'Thiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis '
+                         'sssssttttttttrrrriiiiiiiiiiiiiiinnnnnnnnnnnnng is '
+                         'wwwwwwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyy '
+                         'tttoooooooooooooooooooooooooooooooooooooooooooooo '
+                         'lllooooooooooooooooooooooonnnnnnnnnnnnnnnnnnnggggg'
+                         ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!', port=SNMP_SRV_PORT)
+    assert 'Value out of range' in str(excinfo.value)

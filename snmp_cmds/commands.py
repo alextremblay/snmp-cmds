@@ -14,7 +14,7 @@ from subprocess import run, PIPE
 from typing import Union, Optional, List, Tuple, Dict
 
 # Internal module imports
-from .exceptions import SNMPTableError
+from .exceptions import SNMPTableError, SNMPWriteError
 from .helpers import validate_ip_address, check_for_timeout, \
     handle_unknown_error
 
@@ -263,3 +263,69 @@ def snmptable(community: str, ipaddress: str, oid: str,
         if sortkey:
             results.sort(key=lambda i: i[sortkey])
         return results
+
+
+def snmpset(community: str, ipaddress: str, oid: str, type: str, value: str,
+            port: Union[int, str] = 161, timeout: Union[int, str] = 3) \
+        -> Optional[str]:
+    """
+    Runs Net-SNMP's 'snmpget' command on a given OID, and returns the result.
+    :param community: the snmpv2 community string
+    :param ipaddress: the IP address of the target SNMP server
+    :param oid: the Object IDentifier to request from the target SNMP server
+    :param port: the port on which SNMP is running on the target server
+    :param timeout: the number of seconds to wait for a response from the 
+    SNMP server  
+    :return: 
+    """
+    ipaddress = validate_ip_address(ipaddress)
+    host = '{}:{}'.format(ipaddress, port)
+
+    # snmpset type checking
+    valid_types = ['i', 'u', 't', 'a', 'o', 's', 'x', 'd', 'b']
+    for type_code in valid_types:
+        if type == type_code:
+            # the type argument is one of snmpset's accepted type codes
+            break
+    else:
+        # type didn't match any type code accepted by snmpset
+        raise SNMPWriteError(
+            "The type value you specified does not match one of the accepted "
+            "type codes.\nValid type codes are one of ({})"
+                .format("|".join(valid_types))
+        )
+
+    cmdargs = [
+        'snmpset', '-OQfn', '-t', str(timeout), '-r', '0', '-v', '2c', '-c',
+        community, host, oid, type, value]
+
+    cmd = run(cmdargs, stdout=PIPE, stderr=PIPE)
+
+    # Handle any errors that came up
+    if cmd.returncode is not 0:
+        check_for_timeout(cmd.stderr, host)
+
+        # Check for write errors
+        for errormsg in [b'Bad variable type', b'Value out of range']:
+            if errormsg in cmd.stderr:
+                raise SNMPWriteError(cmd.stderr)
+
+        # if previous check didn't generate an Error, this handler will be
+        # called as a sort of catch-all
+        handle_unknown_error(' '.join(cmdargs), cmd.stderr)
+    # Process results
+    else:
+        # subprocess returns stdout from completed command as a single bytes
+        # string. We'll convert it into a regular python string for easier
+        # handling
+        cmdoutput = cmd.stdout.decode('utf-8')
+        # Check for no such instance
+        if 'No Such Instance' in cmdoutput:
+            raise SNMPWriteError(
+                "We've received a 'No Such Instance' error from the server. "
+                "This can be caused by a number of things. Most likely, your "
+                "SNMP write community is incorrect, the OID you specified "
+                "doesn't exist on your target device, or your target device "
+                "doesn't support writing to this writeable field")
+        else:
+            return cmdoutput
