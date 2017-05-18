@@ -19,7 +19,7 @@ from .helpers import validate_ip_address, check_for_timeout, \
     handle_unknown_error
 
 
-def snmpget(community: str, ipaddress: str, oid: str,
+def snmpget(ipaddress: str, oid: str, community: str = 'public',
             port: Union[int, str] = 161, timeout: Union[int, str] = 3) \
         -> Optional[str]:
     """
@@ -61,9 +61,9 @@ def snmpget(community: str, ipaddress: str, oid: str,
             return cmdoutput
 
 
-def snmpgetbulk(community: str, ipaddress: str, oids: List[str],
-                port: Union[str, int] = 161, timeout: int = 3) \
-        -> List[Tuple[str, str]]:
+def snmpgetbulk(ipaddress: str, oids: List[str], community: str = 'public',
+                port: Union[str, int] = 161, timeout: Union[int, str] = 3
+                ) -> List[Tuple[str, str]]:
     """
     Runs Net-SNMP's 'snmpget' command on a list of OIDs, and returns a list 
     of tuples of the form (oid, result).
@@ -95,7 +95,7 @@ def snmpgetbulk(community: str, ipaddress: str, oids: List[str],
 
         # if previous check didn't generate an Error, this handler will be
         # called as a sort of catch-all
-        handle_unknown_error(' '. join(cmdargs), cmd.stderr)
+        handle_unknown_error(' '.join(cmdargs), cmd.stderr)
     # Process results
     else:
         cmdoutput = cmd.stdout.splitlines()
@@ -136,7 +136,7 @@ def snmpgetbulk(community: str, ipaddress: str, oids: List[str],
         return result
 
 
-def snmpwalk(community: str, ipaddress: str, oid: str,
+def snmpwalk(ipaddress: str, oid: str, community: str = 'public',
              port: Union[str, int] = 161, timeout: int = 3) \
         -> List[Tuple[str, str]]:
     """
@@ -207,7 +207,7 @@ def snmpwalk(community: str, ipaddress: str, oid: str,
         return result
 
 
-def snmptable(community: str, ipaddress: str, oid: str,
+def snmptable(ipaddress: str, oid: str, community: str = 'public',
               port: Union[str, int] = 161, timeout: int = 3,
               sortkey: Optional[str] = None) -> List[Dict[str, str]]:
     """
@@ -265,14 +265,18 @@ def snmptable(community: str, ipaddress: str, oid: str,
         return results
 
 
-def snmpset(community: str, ipaddress: str, oid: str, type: str, value: str,
-            port: Union[int, str] = 161, timeout: Union[int, str] = 3) \
-        -> Optional[str]:
+def snmpset(ipaddress: str, oid: str, value_type: str, value: str,
+            community: str = 'private', port: Union[int, str] = 161,
+            timeout: Union[int, str] = 3) -> str:
     """
-    Runs Net-SNMP's 'snmpget' command on a given OID, and returns the result.
+    Runs Net-SNMP's 'snmpset' command on a given OID, and returns the result 
+    if successful.
     :param community: the snmpv2 community string
     :param ipaddress: the IP address of the target SNMP server
     :param oid: the Object IDentifier to request from the target SNMP server
+    :param value_type: the SNMP value type to set. can be one of (i|u|t|a|o|s
+    |x|d|b)
+    :param value: the value to set
     :param port: the port on which SNMP is running on the target server
     :param timeout: the number of seconds to wait for a response from the 
     SNMP server  
@@ -284,7 +288,7 @@ def snmpset(community: str, ipaddress: str, oid: str, type: str, value: str,
     # snmpset type checking
     valid_types = ['i', 'u', 't', 'a', 'o', 's', 'x', 'd', 'b']
     for type_code in valid_types:
-        if type == type_code:
+        if value_type == type_code:
             # the type argument is one of snmpset's accepted type codes
             break
     else:
@@ -292,12 +296,12 @@ def snmpset(community: str, ipaddress: str, oid: str, type: str, value: str,
         raise SNMPWriteError(
             "The type value you specified does not match one of the accepted "
             "type codes.\nValid type codes are one of ({})"
-                .format("|".join(valid_types))
+            .format("|".join(valid_types))
         )
 
     cmdargs = [
         'snmpset', '-OQfn', '-t', str(timeout), '-r', '0', '-v', '2c', '-c',
-        community, host, oid, type, value]
+        community, host, oid, value_type, value]
 
     cmd = run(cmdargs, stdout=PIPE, stderr=PIPE)
 

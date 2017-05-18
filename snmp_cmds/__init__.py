@@ -1,3 +1,6 @@
+from .commands import snmpset, snmptable, snmpgetbulk, snmpget, snmpwalk
+from .exceptions import SNMPError, SNMPWriteError, SNMPInvalidAddress, \
+    SNMPTimeout, SNMPTableError
 
 # Run a test on import to ensure the net-snmp binaries are installed.
 from subprocess import run, DEVNULL
