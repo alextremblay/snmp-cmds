@@ -8,9 +8,9 @@ setup(
         line utilities''',
     url='https://github.com/alextremblay/snmp-cmds',
     author='Alex Tremblay',
-    license='LGPLv3',
+    license='MIT',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
 
         'Intended Audience :: System Administrators',
         'Intended Audience :: Telecommunications Industry',
@@ -19,8 +19,7 @@ setup(
         'Topic :: System :: Networking',
         'Topic :: System :: Systems Administration',
 
-        'License :: OSI Approved :: GNU Lesser General Public License v3 \
-        (LGPLv3)',
+        'License :: OSI Approved :: MIT License',
 
         'Operating System :: MacOS',
         'Operating System :: Microsoft',
@@ -28,9 +27,6 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: Unix',
 
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
