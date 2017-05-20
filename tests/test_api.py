@@ -34,11 +34,11 @@ def test_api_get(valid_snmp_server: Session):
     assert type(result) is str
 
 
-def test_api_get_bulk(valid_snmp_server: Session):
+def test_api_get_some(valid_snmp_server: Session):
     """
     Make sure the API's get_bulk method completes without errors
     """
-    result = valid_snmp_server.get_bulk(
+    result = valid_snmp_server.get_some(
         oids=[SYSDESCR_OID, SYSLOCATION_OID, SYSNAME_OID]
     )
     assert type(result) is list

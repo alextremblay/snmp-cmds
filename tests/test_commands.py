@@ -4,7 +4,7 @@ files for a cisco chassis, a cisco switch, a nortel stack, and a nortel switch
 """
 import pytest
 
-from snmp_cmds import snmpwalk, snmpget, snmpgetbulk, snmptable, snmpset
+from snmp_cmds import snmpwalk, snmpget, snmpgetsome, snmptable, snmpset
 from snmp_cmds import SNMPError, SNMPTimeout, SNMPInvalidAddress, \
     SNMPTableError, SNMPWriteError
 
@@ -30,7 +30,7 @@ def test_snmp_invalid_address():
                     ipaddress='invalid-hostname', )
         assert 'does not appear to be a valid' in str(excinfo.value)
     with pytest.raises(SNMPInvalidAddress) as excinfo:
-        snmpgetbulk(oids=['some-irelevant-oid'], community='public',
+        snmpgetsome(oids=['some-irelevant-oid'], community='public',
                     ipaddress='invalid-hostname', )
     assert 'does not appear to be a valid' in str(excinfo.value)
 
@@ -46,7 +46,7 @@ def test_snmp_timeout():
         assert 'Timeout' in str(excinfo.value)
 
     with pytest.raises(SNMPTimeout) as excinfo:
-        snmpgetbulk(ipaddress='10.0.0.1', oids=['IF-MIB::ifTable'], timeout='1')
+        snmpgetsome(ipaddress='10.0.0.1', oids=['IF-MIB::ifTable'], timeout='1')
     assert 'Timeout' in str(excinfo.value)
 
     with pytest.raises(SNMPTimeout) as excinfo:
@@ -125,7 +125,7 @@ def test_snmpgetbulk_return_structure():
     """
     oids = ['IF-MIB::ifTable.1.1.1', 'IF-MIB::ifTable.1.2.1',
             'IF-MIB::ifTable.1.3.1']
-    result = snmpgetbulk(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpgetsome(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert type(result) is list
     assert len(result) == len(oids)
@@ -144,7 +144,7 @@ def test_snmpgetbulk_return_contains_no_such_instance():
     """
     oids = ['IF-MIB::ifTable.1.1.1', 'IF-MIB::ifTable.1.2.1',
             'IF-MIB::ifTable.1.3']
-    result = snmpgetbulk(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpgetsome(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert type(result[1][1]) is str
     assert result[2][0] == '.1.3.6.1.2.1.2.2.1.3'
@@ -165,7 +165,7 @@ def test_snmpgetbulk_return_contains_multiline_output():
     """
     oids = ['IF-MIB::ifTable.1.1.1', 'SNMPv2-MIB::sysDescr.0',
             'IF-MIB::ifTable.1.3']
-    result = snmpgetbulk(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpgetsome(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert len(result) is 3
     assert type(result[1]) is tuple

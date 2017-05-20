@@ -1,4 +1,4 @@
-from .commands import snmpset, snmptable, snmpgetbulk, snmpget, snmpwalk
+from .commands import snmpset, snmptable, snmpgetsome, snmpget, snmpwalk
 from .exceptions import SNMPError, SNMPWriteError, SNMPInvalidAddress, \
     SNMPTimeout, SNMPTableError
 from .api import Session

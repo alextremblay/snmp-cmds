@@ -1,12 +1,21 @@
-
+"""
+This module provides a Session class for making multiple SNMP requests to the 
+same device. If you plan on making relatively few SNMP requests to relatively 
+many SNMP targets, you may want to check out commands.py instead.
+"""
 # imports for type-checking purposes
 from typing import Union, Optional, List, Tuple, Dict
 
 # Internal module imports
-from .commands import snmpget, snmpgetbulk, snmpwalk, snmptable, snmpset
+from .commands import snmpget, snmpgetsome, snmpwalk, snmptable, snmpset
 
 
 class Session(object):
+    """
+    This class represents an open session to a single SNMP target device. 
+    Once instantiated, it can be used to make easy and convenient calls to 
+    get or set information on that target.
+    """
     def __init__(self,
                  ipaddress: str,
                  port: Union[str, int] = 161,
@@ -23,14 +32,14 @@ class Session(object):
         return snmpget(ipaddress=self.ipaddress, port=self.port, oid=oid,
                        community=self.read_community, timeout=self.timeout)
 
-    def get_bulk(self, oids: List[str]) -> Optional[List[Tuple[str, str]]]:
-        return snmpgetbulk(ipaddress=self.ipaddress, port=self.port, oids=oids,
+    def get_some(self, oids: List[str]) -> Optional[List[Tuple[str, str]]]:
+        return snmpgetsome(ipaddress=self.ipaddress, port=self.port, oids=oids,
                            community=self.read_community, timeout=self.timeout)
 
     def get_table(self, oid: str,
                   sortkey: Optional[str] = None) -> List[Dict[str, str]]:
         return snmptable(ipaddress=self.ipaddress, port=self.port, oid=oid,
-                       community=self.read_community, timeout=self.timeout,
+                         community=self.read_community, timeout=self.timeout,
                          sortkey=sortkey)
 
     def walk(self, oid: str) -> Optional[List[Tuple[str, str]]]:
