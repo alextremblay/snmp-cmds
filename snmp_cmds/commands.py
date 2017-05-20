@@ -1,9 +1,8 @@
 """
-This internal module serves as an interface between a python application and
-the net-snmp binaries on the host system. This module provides a function
-for each of the most popular net-snmp binary commands, runs that binary 
-with custom options, parse its output, and delivers it back in a meaningful 
-form. 
+This module provides the individual SNMP commands for use in one-off 
+situations, or situations where you would need to make a single SNMP request 
+to many devices. If you plan on making multiple calls to the same device, you 
+might want to check out api.py instead.
 """
 
 # Standard Library imports
@@ -61,7 +60,7 @@ def snmpget(ipaddress: str, oid: str, community: str = 'public',
             return cmdoutput
 
 
-def snmpgetbulk(ipaddress: str, oids: List[str], community: str = 'public',
+def snmpgetsome(ipaddress: str, oids: List[str], community: str = 'public',
                 port: Union[str, int] = 161, timeout: Union[int, str] = 3
                 ) -> List[Tuple[str, str]]:
     """
