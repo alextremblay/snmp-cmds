@@ -64,7 +64,7 @@ def test_api_walk(valid_snmp_server: Session):
     result = valid_snmp_server.walk(oid=IFTABLE_OID)
     assert isinstance(result, list)
     assert isinstance(result[0], tuple)
-    assert isinstance(result[0][0], tuple)
+    assert isinstance(result[0][0], str)
     assert isinstance(result[0][1], str)
 
 
