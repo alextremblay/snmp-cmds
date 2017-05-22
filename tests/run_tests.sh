@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-snmpsimd.py --agent-udpv4-endpoint=127.0.0.1:10000 --data-dir=tests > /dev/null &
+snmpsimd.py --agent-udpv4-endpoint=127.0.0.1:10000 --data-dir=tests 2>/dev/null &
 SNMPSIM_PID=$!
 pytest
 PYTEST_STATUS=$?
