@@ -61,12 +61,12 @@ def test_snmptable_return_structure():
     snmptable return data should be a list of dicts containing info about 
     each row in the table
     """
-    iftable = snmptable(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    iftable = snmptable(community='public', ipaddress=SNMP_SRV_ADDR,
                         oid=IFTABLE_OID, port=SNMP_SRV_PORT, sortkey='ifIndex')
     assert type(iftable) is list
     assert type(iftable[0]) is dict
     assert type(iftable[0]['ifDescr']) is str
-    assert iftable[0]['ifDescr'] == 'Vlan1'
+    assert iftable[1]['ifDescr'] == 'eth0'
 
 
 def test_snmptable_wrong_oid():
@@ -78,7 +78,7 @@ def test_snmptable_wrong_oid():
     produced by the net-snmp command as a generic SNMPError
     """
     with pytest.raises(SNMPError):
-        snmptable(community='cisco-chassis', ipaddress=SNMP_SRV_ADDR,
+        snmptable(community='public', ipaddress=SNMP_SRV_ADDR,
                   oid='WRONG-MIB::Bogus-Table', port=SNMP_SRV_PORT)
 
 
@@ -88,7 +88,7 @@ def test_snmptable_not_table():
     which is not a table.
     """
     with pytest.raises(SNMPTableError) as excinfo:
-        snmptable(community='cisco-chassis', ipaddress=SNMP_SRV_ADDR,
+        snmptable(community='public', ipaddress=SNMP_SRV_ADDR,
                   oid='IF-MIB::ifEntry', port=SNMP_SRV_PORT)
     assert 'could not identify IF-MIB::ifEntry as a table' in str(excinfo.value)
 
@@ -98,9 +98,9 @@ def test_snmpget_return_structure():
     The snmpget function takes one OID, and should give us that OID's value 
     as a string
     """
-    result = snmpget(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpget(community='public', ipaddress=SNMP_SRV_ADDR,
                      oid=SYSDESCR_OID, port=SNMP_SRV_PORT)
-    assert 'Cisco IOS Software' in result
+    assert 'Linux' in result
     assert type(result) is str
 
 
@@ -111,7 +111,7 @@ def test_snmpget_no_such_instance():
     if result:
         # do stuff
     """
-    result = snmpget(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpget(community='public', ipaddress=SNMP_SRV_ADDR,
                      oid='SNMPv2-MIB::sysName', port=SNMP_SRV_PORT)
     assert result is None
 
@@ -125,7 +125,7 @@ def test_snmpgetbulk_return_structure():
     """
     oids = ['IF-MIB::ifTable.1.1.1', 'IF-MIB::ifTable.1.2.1',
             'IF-MIB::ifTable.1.3.1']
-    result = snmpgetsome(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpgetsome(community='public', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert type(result) is list
     assert len(result) == len(oids)
@@ -133,7 +133,7 @@ def test_snmpgetbulk_return_structure():
     assert type(result[0][0]) is str
     assert type(result[0][1]) is str
     assert result[1][0] == '.1.3.6.1.2.1.2.2.1.2.1'
-    assert result[1][1] == 'Vlan1'
+    assert result[1][1] == 'lo'
 
 
 def test_snmpgetbulk_return_contains_no_such_instance():
@@ -144,7 +144,7 @@ def test_snmpgetbulk_return_contains_no_such_instance():
     """
     oids = ['IF-MIB::ifTable.1.1.1', 'IF-MIB::ifTable.1.2.1',
             'IF-MIB::ifTable.1.3']
-    result = snmpgetsome(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpgetsome(community='public', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert type(result[1][1]) is str
     assert result[2][0] == '.1.3.6.1.2.1.2.2.1.3'
@@ -165,7 +165,7 @@ def test_snmpgetbulk_return_contains_multiline_output():
     """
     oids = ['IF-MIB::ifTable.1.1.1', 'SNMPv2-MIB::sysDescr.0',
             'IF-MIB::ifTable.1.3']
-    result = snmpgetsome(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpgetsome(community='multiline-test', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert len(result) is 3
     assert type(result[1]) is tuple
@@ -179,7 +179,7 @@ def test_snmpwalk_return_structure():
     walked. Each touple should contain the OID walked and the value of that 
     OID on the server.
     """
-    result = snmpwalk(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpwalk(community='public', ipaddress=SNMP_SRV_ADDR,
                       oid='IF-MIB::ifTable', port=SNMP_SRV_PORT)
     assert type(result) is list
     assert type(result[0]) is tuple
@@ -200,7 +200,7 @@ def test_snmpwalk_return_contains_multiline_output():
     an oid-value pair or a continuation of the value from the last pair and 
     act accordingly
     """
-    result = snmpwalk(community='cisco-switch', ipaddress=SNMP_SRV_ADDR,
+    result = snmpwalk(community='multiline-test', ipaddress=SNMP_SRV_ADDR,
                       oid='SNMPv2-MIB::system', port=SNMP_SRV_PORT)
     assert type(result[0]) is tuple
     assert '\n' in result[0][1]

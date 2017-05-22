@@ -34,7 +34,7 @@ setup(
     ],
     packages=['snmp_cmds'],
     extras_require={
-        'test': ['pytest']
+        'test': ['pytest', 'snmpsim']
     },
     entry_points=None
 )
