@@ -34,7 +34,7 @@ The hard way:
     pip install .
 
 **In order to use this library, you must have Net-SNMP installed on your system. Most linux systems come with Net-SNMP.**
-**A simple way to test this is to run ``snmpget -V`` and see what you get**
+**A simple way to test this is to run** ``snmpget -V`` **and see what you get**
 
 Usage: API
 ==========
