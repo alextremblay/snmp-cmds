@@ -8,6 +8,9 @@ snmp-cmds: The easiest portable SNMP library around
 .. image:: https://img.shields.io/badge/License-MIT-blue.svg
    :target: https://github.com/alextremblay/snmp-cmds/blob/master/LICENSE
    :alt: License: MIT
+.. image:: https://travis-ci.org/alextremblay/snmp-cmds.svg?branch=master
+   :target: https://travis-ci.org/alextremblay/snmp-cmds
+   :alt: Travis CI build status
 
 
 snmp-cmds is a python library for communicating with a target device through SNMP
@@ -32,6 +35,7 @@ This package requires the following software be installed on your system:
 
 - `Net-SNMP<http://net-snmp.org>`_ (can be installed with ``sudo apt-get install snmp`` on Ubuntu)
 - IETF RFC MIBs (can be installed with ``sudo apt-get install snmp-mibs-downloader`` on Ubuntu)
+- Python 3.5+
 
 Install
 =======
@@ -85,5 +89,3 @@ If you want to make a few SNMP requests to many targets, consider using the indi
                    # the OID walked and the value found at that OID.
 
 Available commands: snmpget snmpget. snmpgetsome, snmpwalk, snmptable, snmpset
-
-For more information on the commands / API methods, their signatures, and what they do, please see the `Full Documentation <snmp-cmds.readthedocs.io>`_.

@@ -1,11 +1,13 @@
 from setuptools import setup
 
+with open('README.rst') as file:
+    long_description = file.read()
+
 setup(
     name='snmp-cmds',
-    version='0.1',
-    description='A python library for issuing SNMP commands',
-    long_description='''This package is a wrapper around the Net-SNMP command 
-        line utilities''',
+    version='1.0',
+    description='A python wrapper around the Net-SNMP command line utilities',
+    long_description=long_description,
     url='https://github.com/alextremblay/snmp-cmds',
     author='Alex Tremblay',
     license='MIT',

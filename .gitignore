@@ -4,4 +4,6 @@
 testing.ipynb
 .DS_Store
 .idea/
-/docs/build/
+docs/build/
+build/
+dist/
