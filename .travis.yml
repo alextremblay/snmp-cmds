@@ -1,6 +1,6 @@
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install snmp
+  - sudo apt-get install snmp snmp-mibs-downloader
 language: python
 python:
   - "3.2"

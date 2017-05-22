@@ -24,6 +24,15 @@ In writing this library, I set out to find a middle ground. A library which coul
 
 Although this library should work on Windows platform that have Net-SNMP installed, it has not yet been tested on Windows. Use with caution.
 
+
+Requirements
+============
+
+This package requires the following software be installed on your system:
+
+- `Net-SNMP<http://net-snmp.org>`_ (can be installed with ``sudo apt-get install snmp`` on Ubuntu)
+- IETF RFC MIBs (can be installed with ``sudo apt-get install snmp-mibs-downloader`` on Ubuntu)
+
 Install
 =======
 
@@ -40,9 +49,6 @@ The hard way:
     git clone https://github.com/alextremblay/snmp-cmds.git
     cd snmp-cmds
     pip install .
-
-**In order to use this library, you must have Net-SNMP installed on your system. Most linux systems come with Net-SNMP.**
-**A simple way to test this is to run** ``snmpget -V`` **and see what you get**
 
 Usage: API
 ==========
@@ -80,4 +86,4 @@ If you want to make a few SNMP requests to many targets, consider using the indi
 
 Available commands: snmpget snmpget. snmpgetsome, snmpwalk, snmptable, snmpset
 
-For more information on the commands / API methods, their signatures, and what they do, please see the `Full Documentation <coming soon>`.
+For more information on the commands / API methods, their signatures, and what they do, please see the `Full Documentation <snmp-cmds.readthedocs.io>`_.

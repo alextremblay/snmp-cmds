@@ -2,6 +2,14 @@
 snmp-cmds: The easiest portable SNMP library around
 ***************************************************
 
+.. image:: https://readthedocs.org/projects/snmp-cmds/badge/?version=latest
+   :target: http://snmp-cmds.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+.. image:: https://img.shields.io/badge/License-MIT-blue.svg
+   :target: https://github.com/alextremblay/snmp-cmds/blob/master/LICENSE
+   :alt: License: MIT
+
+
 snmp-cmds is a python library for communicating with a target device through SNMP
 
 There's like... dozens of SNMP libs out there. Why bother?
@@ -15,6 +23,15 @@ Some, like the net-snmp bindings and easysnmp, are built as extensions to C libr
 In writing this library, I set out to find a middle ground. A library which could leverage the power and speed of the Net-SNMP project, while being portable pure-python and not being tied to any particular version of Net-SNMP. I accomplished this by making a library that calls the Net-SNMP binaries as subprocesses.
 
 Although this library should work on Windows platform that have Net-SNMP installed, it has not yet been tested on Windows. Use with caution.
+
+
+Requirements
+============
+
+This package requires the following software be installed on your system:
+
+- `Net-SNMP<http://net-snmp.org>`_ (can be installed with ``sudo apt-get install snmp`` on Ubuntu)
+- IETF RFC MIBs (can be installed with ``sudo apt-get install snmp-mibs-downloader`` on Ubuntu)
 
 Install
 =======
@@ -32,9 +49,6 @@ The hard way:
     git clone https://github.com/alextremblay/snmp-cmds.git
     cd snmp-cmds
     pip install .
-
-**In order to use this library, you must have Net-SNMP installed on your system. Most linux systems come with Net-SNMP.**
-**A simple way to test this is to run** ``snmpget -V`` **and see what you get**
 
 Usage: API
 ==========
@@ -72,3 +86,4 @@ If you want to make a few SNMP requests to many targets, consider using the indi
 
 Available commands: snmpget snmpget. snmpgetsome, snmpwalk, snmptable, snmpset
 
+For more information on the commands / API methods, their signatures, and what they do, please see the `Full Documentation <snmp-cmds.readthedocs.io>`_.
