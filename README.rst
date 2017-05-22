@@ -35,6 +35,7 @@ This package requires the following software be installed on your system:
 
 - `Net-SNMP<http://net-snmp.org>`_ (can be installed with ``sudo apt-get install snmp`` on Ubuntu)
 - IETF RFC MIBs (can be installed with ``sudo apt-get install snmp-mibs-downloader`` on Ubuntu)
+- Python 3.3+
 
 Install
 =======
