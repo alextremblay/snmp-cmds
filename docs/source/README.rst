@@ -14,6 +14,8 @@ Some, like the net-snmp bindings and easysnmp, are built as extensions to C libr
 
 In writing this library, I set out to find a middle ground. A library which could leverage the power and speed of the Net-SNMP project, while being portable pure-python and not being tied to any particular version of Net-SNMP. I accomplished this by making a library that calls the Net-SNMP binaries as subprocesses.
 
+Although this library should work on Windows platform that have Net-SNMP installed, it has not yet been tested on Windows. Use with caution.
+
 Install
 =======
 
@@ -32,7 +34,7 @@ The hard way:
     pip install .
 
 **In order to use this library, you must have Net-SNMP installed on your system. Most linux systems come with Net-SNMP.**
-**A simple way to test this is to run ``snmpget -V`` and see what you get**
+**A simple way to test this is to run** ``snmpget -V`` **and see what you get**
 
 Usage: API
 ==========
