@@ -70,4 +70,3 @@ If you want to make a few SNMP requests to many targets, consider using the indi
 
 Available commands: snmpget snmpget. snmpgetsome, snmpwalk, snmptable, snmpset
 
-For more information on the commands / API methods, their signatures, and what they do, please see the `Full Documentation <coming soon>`.

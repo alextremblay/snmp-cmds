@@ -10,7 +10,9 @@ import csv
 from subprocess import run, PIPE
 
 # imports for type-hinting purposes
-from typing import Union, Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict
+from typing import Union as OneOf
+
 
 # Internal module imports
 from .exceptions import SNMPTableError, SNMPWriteError
@@ -19,17 +21,31 @@ from .helpers import validate_ip_address, check_for_timeout, \
 
 
 def snmpget(ipaddress: str, oid: str, community: str = 'public',
-            port: Union[int, str] = 161, timeout: Union[int, str] = 3) \
-        -> Optional[str]:
+            port: OneOf[int, str] = 161, timeout: OneOf[int, str] = 3
+            ) -> Optional[str]:
     """
-    Runs Net-SNMP's 'snmpget' command on a given OID, and returns the result.
+    Wrapper around Net-SNMP's ``snmpget`` command
+    
+    Runs the equivalent of 
+    '``snmpget -Oqv -Pe -t {timeout} -r 0 -v 2c -c {community} {host} {oid}``' 
+    and parses the result. if the response from the server is a 
+    ``No Such Object`` or a ``No Such Instance`` error, this function returns 
+    :obj:`None`. Otherwise, it returns the value retrieved from the server
+    
     :param community: the snmpv2 community string
     :param ipaddress: the IP address of the target SNMP server
     :param oid: the Object IDentifier to request from the target SNMP server
     :param port: the port on which SNMP is running on the target server
     :param timeout: the number of seconds to wait for a response from the 
-    SNMP server  
-    :return: 
+        SNMP server  
+    :return: the value stored at that OID on the target SNMP server if 
+        successful, :obj:`None` otherwise
+    :raises `~snmp_cmds.exceptions.SNMPTimeout`: if the target SNMP server 
+        fails to respond
+    :raises `~snmp_cmds.exceptions.SNMPInvalidAddress`: if the hostname or
+        IP address supplied is not valid or cannot be resolved
+    :raises `~snmp_cmds.exceptions.SNMPError`: if the underlying 
+        Net-SNMP command produces an unknown or unhandled error
     """
     ipaddress = validate_ip_address(ipaddress)
     host = '{}:{}'.format(ipaddress, port)
@@ -61,19 +77,29 @@ def snmpget(ipaddress: str, oid: str, community: str = 'public',
 
 
 def snmpgetsome(ipaddress: str, oids: List[str], community: str = 'public',
-                port: Union[str, int] = 161, timeout: Union[int, str] = 3
+                port: OneOf[str, int] = 161, timeout: OneOf[int, str] = 3
                 ) -> List[Tuple[str, str]]:
     """
+    Warpper around Net-SNMP's 
+    
     Runs Net-SNMP's 'snmpget' command on a list of OIDs, and returns a list 
     of tuples of the form (oid, result).
+    
     :param community: the snmpv2 community string
     :param ipaddress: the IP address of the target SNMP server
     :param oids: a list of Object IDentifiers to request from the target 
-    SNMP server
+        SNMP server
     :param port: the port on which SNMP is running on the target server
     :param timeout: the number of seconds to wait for a response from the 
-    SNMP server 
-    :return: 
+        SNMP server 
+    :return: a list of tuples of the form (oid, result)
+    :raises `~snmp_cmds.exceptions.SNMPTimeout`: if the target SNMP 
+        server 
+        fails to respond
+    :raises `~snmp_cmds.exceptions.SNMPInvalidAddress`: if the hostname or
+        IP address supplied is not valid or cannot be resolved
+    :raises `~snmp_cmds.exceptions.SNMPError`: if the underlying 
+        Net-SNMP command produces an unknown or unhandled error
     """
     ipaddress = validate_ip_address(ipaddress)
     host = '{}:{}'.format(ipaddress, port)
@@ -136,18 +162,25 @@ def snmpgetsome(ipaddress: str, oids: List[str], community: str = 'public',
 
 
 def snmpwalk(ipaddress: str, oid: str, community: str = 'public',
-             port: Union[str, int] = 161, timeout: int = 3) \
-        -> List[Tuple[str, str]]:
+             port: OneOf[str, int] = 161, timeout: int = 3
+             ) -> List[Tuple[str, str]]:
     """
     Runs Net-SNMP's 'snmpget' command on a list of OIDs, and returns a list 
     of tuples of the form (oid, result).
+    
     :param community: the snmpv2 community string
     :param ipaddress: the IP address of the target SNMP server
     :param oid: the Object IDentifier to request from the target SNMP server
     :param port: the port on which SNMP is running on the target server
     :param timeout: the number of seconds to wait for a response from the 
-    SNMP server 
-    :return: 
+        SNMP server 
+    :return: a list of tuples of the form (oid, result)
+    :raises `~snmp_cmds.exceptions.SNMPTimeout`: if the target SNMP server 
+        fails to respond
+    :raises `~snmp_cmds.exceptions.SNMPInvalidAddress`: if the hostname or
+        IP address supplied is not valid or cannot be resolved
+    :raises `~snmp_cmds.exceptions.SNMPError`: if the underlying 
+        Net-SNMP command produces an unknown or unhandled error
     """
     ipaddress = validate_ip_address(ipaddress)
     host = '{}:{}'.format(ipaddress, port)
@@ -207,21 +240,31 @@ def snmpwalk(ipaddress: str, oid: str, community: str = 'public',
 
 
 def snmptable(ipaddress: str, oid: str, community: str = 'public',
-              port: Union[str, int] = 161, timeout: int = 3,
-              sortkey: Optional[str] = None) -> List[Dict[str, str]]:
+              port: OneOf[str, int] = 161, timeout: int = 3,
+              sortkey: Optional[str] = None
+              ) -> OneOf[List[Dict[str, str]], Dict[str, Dict[str, str]]]:
     """
     Runs Net-SNMP's 'snmptable' command on a given OID, converts the results
     into a list of dictionaries, and optionally sorts the list by a given key.
+    
     :param community: the snmpv2 community string
     :param ipaddress: the IP address of the target SNMP server
     :param oid: the Object IDentifier to request from the target SNMP server
     :param port: the port on which SNMP is running on the target server
     :param sortkey: the key within each dict upon which to sort the list of 
-    results
+        results
     :param timeout: the number of seconds to wait for a response from the 
-    SNMP server
+        SNMP server
     :return: a list of dicts, one for each row of the table. The keys of the 
-    dicts correspond to the column names of the table.
+        dicts correspond to the column names of the table.
+    :raises `~snmp_cmds.exceptions.SNMPTimeout`: if the target SNMP server 
+        fails to respond
+    :raises `~snmp_cmds.exceptions.SNMPInvalidAddress`: if the hostname or
+        IP address supplied is not valid or cannot be resolved
+    :raises `~snmp_cmds.exceptions.SNMPError`: if the underlying 
+        Net-SNMP command produces an unknown or unhandled error
+    :raises `~snmp_cmds.exceptions.SNMPTableError`: if the requested OID 
+        is not a valid table
     """
 
     # We want our delimiter to be something that would never show up in the
@@ -265,21 +308,33 @@ def snmptable(ipaddress: str, oid: str, community: str = 'public',
 
 
 def snmpset(ipaddress: str, oid: str, value_type: str, value: str,
-            community: str = 'private', port: Union[int, str] = 161,
-            timeout: Union[int, str] = 3) -> str:
+            community: str = 'private', port: OneOf[int, str] = 161,
+            timeout: OneOf[int, str] = 3
+            ) -> str:
     """
     Runs Net-SNMP's 'snmpset' command on a given OID, and returns the result 
     if successful.
+    
     :param community: the snmpv2 community string
     :param ipaddress: the IP address of the target SNMP server
     :param oid: the Object IDentifier to request from the target SNMP server
-    :param value_type: the SNMP value type to set. can be one of (i|u|t|a|o|s
-    |x|d|b)
+    :param value_type: the SNMP value type to set. can be one of 
+        (i/u/t/a/o/s/x/d/b)
     :param value: the value to set
     :param port: the port on which SNMP is running on the target server
     :param timeout: the number of seconds to wait for a response from the 
-    SNMP server  
-    :return: 
+        SNMP server  
+    :return: the value that was set on the SNMP target
+    :raises `~snmp_cmds.exceptions.SNMPTimeout`: if the target SNMP server 
+        fails to respond
+    :raises `~snmp_cmds.exceptions.SNMPInvalidAddress`: if the hostname or
+        IP address supplied is not valid or cannot be resolved
+    :raises `~snmp_cmds.exceptions.SNMPError`: if the underlying 
+        Net-SNMP command produces an unknown or unhandled error
+    :raises `~snmp_cmds.exceptions.SNMPWriteError`: if the snmpset 
+        operation failed for a known reason. The message associated with this 
+        error should always contain information regarding the reason for the 
+        error.
     """
     ipaddress = validate_ip_address(ipaddress)
     host = '{}:{}'.format(ipaddress, port)
