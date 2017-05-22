@@ -15,4 +15,4 @@ python:
 # command to install dependencies
 install: "pip install .[test]"
 # command to run tests
-script: snmpsimd.py --agent-udpv4-endpoint=127.0.0.1:10000 --data-dir=tests && pytest
+script: snmpsimd.py --agent-udpv4-endpoint=127.0.0.1:10000 --data-dir=tests & && SNMPSIM_PID=$! && pytest && kill $SNMPSIM_PID
