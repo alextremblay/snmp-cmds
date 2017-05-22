@@ -8,6 +8,9 @@ snmp-cmds: The easiest portable SNMP library around
 .. image:: https://img.shields.io/badge/License-MIT-blue.svg
    :target: https://github.com/alextremblay/snmp-cmds/blob/master/LICENSE
    :alt: License: MIT
+.. image:: https://travis-ci.org/alextremblay/snmp-cmds.svg?branch=master
+   :target: https://travis-ci.org/alextremblay/snmp-cmds
+   :alt: Travis CI build status
 
 
 snmp-cmds is a python library for communicating with a target device through SNMP
