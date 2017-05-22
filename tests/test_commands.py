@@ -63,9 +63,9 @@ def test_snmptable_return_structure():
     """
     iftable = snmptable(community='public', ipaddress=SNMP_SRV_ADDR,
                         oid=IFTABLE_OID, port=SNMP_SRV_PORT, sortkey='ifIndex')
-    assert type(iftable) is list
-    assert type(iftable[0]) is dict
-    assert type(iftable[0]['ifDescr']) is str
+    assert isinstance(iftable, list)
+    assert isinstance(iftable[0], dict)
+    assert isinstance(iftable[0]['ifDescr'], str)
     assert iftable[1]['ifDescr'] == 'eth0'
 
 
@@ -101,7 +101,7 @@ def test_snmpget_return_structure():
     result = snmpget(community='public', ipaddress=SNMP_SRV_ADDR,
                      oid=SYSDESCR_OID, port=SNMP_SRV_PORT)
     assert 'Linux' in result
-    assert type(result) is str
+    assert isinstance(result, str)
 
 
 def test_snmpget_no_such_instance():
@@ -127,11 +127,11 @@ def test_snmpgetbulk_return_structure():
             'IF-MIB::ifTable.1.3.1']
     result = snmpgetsome(community='public', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
-    assert type(result) is list
+    assert isinstance(result, list)
     assert len(result) == len(oids)
-    assert type(result[0]) is tuple
-    assert type(result[0][0]) is str
-    assert type(result[0][1]) is str
+    assert isinstance(result[0], tuple)
+    assert isinstance(result[0][0], str)
+    assert isinstance(result[0][1], str)
     assert result[1][0] == '.1.3.6.1.2.1.2.2.1.2.1'
     assert result[1][1] == 'lo'
 
@@ -146,7 +146,7 @@ def test_snmpgetbulk_return_contains_no_such_instance():
             'IF-MIB::ifTable.1.3']
     result = snmpgetsome(community='public', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
-    assert type(result[1][1]) is str
+    assert isinstance(result[1][1], str)
     assert result[2][0] == '.1.3.6.1.2.1.2.2.1.3'
     assert result[2][1] is None
 
@@ -168,7 +168,7 @@ def test_snmpgetbulk_return_contains_multiline_output():
     result = snmpgetsome(community='multiline-test', ipaddress=SNMP_SRV_ADDR,
                          oids=oids, port=SNMP_SRV_PORT)
     assert len(result) is 3
-    assert type(result[1]) is tuple
+    assert isinstance(result[1], tuple)
     assert '\n' in result[1][1]
 
 
@@ -181,9 +181,9 @@ def test_snmpwalk_return_structure():
     """
     result = snmpwalk(community='public', ipaddress=SNMP_SRV_ADDR,
                       oid='IF-MIB::ifTable', port=SNMP_SRV_PORT)
-    assert type(result) is list
-    assert type(result[0]) is tuple
-    assert type(result[0][0]) is str and type(result[0][1]) is str
+    assert isinstance(result, list)
+    assert isinstance(result[0], tuple)
+    assert isinstance(result[0][0], str) and isinstance(result[0][1], str)
     assert result[0][0] == '.1.3.6.1.2.1.2.2.1.1.1'
     assert result[0][1] == '1'
 
@@ -202,7 +202,7 @@ def test_snmpwalk_return_contains_multiline_output():
     """
     result = snmpwalk(community='multiline-test', ipaddress=SNMP_SRV_ADDR,
                       oid='SNMPv2-MIB::system', port=SNMP_SRV_PORT)
-    assert type(result[0]) is tuple
+    assert isinstance(result[0], tuple)
     assert '\n' in result[0][1]
 
 
