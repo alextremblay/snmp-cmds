@@ -3,8 +3,6 @@ before_install:
   - sudo apt-get install snmp snmp-mibs-downloader
 language: python
 python:
-  - "3.3"
-  - "3.4"
   - "3.5"
   - "3.6"
   - "3.6-dev" # 3.6 development branch
