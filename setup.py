@@ -10,6 +10,7 @@ setup(
     long_description=long_description,
     url='https://github.com/alextremblay/snmp-cmds',
     author='Alex Tremblay',
+    author_email='alextremblay@github.com',
     license='MIT',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
