@@ -147,5 +147,5 @@ class Session(object):
             for the error.
         """
         return snmpset(ipaddress=self.ipaddress, port=self.port, oid=oid,
-                       community=self.read_community, timeout=self.timeout,
+                       community=self.write_community, timeout=self.timeout,
                        value_type=value_type, value=value)
